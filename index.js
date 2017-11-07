@@ -21,11 +21,11 @@ program
     .parse(process.argv);
 
 if (!(program['paths'] && program['domain']) && !program['sitemap']) {
-    console.log('You have to specify domain with paths or sitemap');
+    console.log('You have to specify domain with paths list or sitemap, run html-grabber --help for more info.');
     process.exit(1);
 }
 
-function list() {
+function list(val) {
     return val.split(',');
 }
 
@@ -50,7 +50,14 @@ function parseUrlsList() {
 
 
 function parseSiteMap() {
-    var contents = fs.readFileSync(path.resolve(__dirname, program['sitemap']), 'utf8');
+    var sitemapPath = path.resolve(program['sitemap']);
+
+    if (!fs.existsSync(sitemapPath)) {
+        console.log("Sitemap file doesn't exists: " + sitemapPath);
+        process.exit(1);
+    }
+
+    var contents = fs.readFileSync(sitemapPath, 'utf8');
     var xml = cheerio.load(contents);
     var result = [];
 
@@ -69,7 +76,7 @@ function parseSiteMap() {
     return result;
 }
 
-var output = path.resolve(__dirname, program['output']);
+var output = path.resolve(program['output']);
 var urls = program['paths'] ? parseUrlsList() : parseSiteMap();
 var tmpobj = tmp.fileSync();
 var logPath = path.resolve(program['log']);

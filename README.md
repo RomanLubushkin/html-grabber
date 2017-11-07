@@ -37,7 +37,7 @@ html-grabber [options]
 ### Grabbing list of urls
 Following command will grab some instagram pages
 ```
-html-grabber --domain https://www.instagram.com --paths /,/explore/,/explore/locations/
+html-grabber --paths /,/explore/,/explore/locations/ --domain https://www.instagram.com
 ```
 
 ### Grabbing urls from sitemap
