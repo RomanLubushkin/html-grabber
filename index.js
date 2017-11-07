@@ -74,8 +74,9 @@ var urls = program['paths'] ? parseUrlsList() : parseSiteMap();
 var tmpobj = tmp.fileSync();
 var logPath = path.resolve(program['log']);
 var command = program['phantom'] + ' ' +
-    path.resolve(__dirname, 'phantom-script.js') + ' ' +
+    path.resolve(__dirname, 'src', 'phantom-script.js') + ' ' +
     tmpobj.name + ' ' +
+    path.resolve(__dirname, 'src', 'timeout.js') + ' ' +
     logPath;
 
 shell.mkdir('-p', path.dirname(logPath));

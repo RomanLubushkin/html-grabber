@@ -2,7 +2,8 @@ var webpage = require('webpage');
 var fs = require('fs');
 var args = require('system').args;
 var configPath = args[1];
-var logPath = args[2];
+var timeoutJs = args[2];
+var logPath = args[3];
 var inputs = JSON.parse(fs.read(configPath));
 var inputsCount = inputs.length;
 
@@ -10,7 +11,7 @@ var pagesMap = {};
 var complete = 0;
 var pagesLimit = 2;
 
-log('Start grabbing ' + inputs.length + ' urls');
+log('Start grabbing ' + inputs.length + ' urls\n');
 for (var i = 0, count = Math.min(inputs.length, pagesLimit); i < count; i++) {
     grabNextOrExit();
 }
@@ -53,17 +54,20 @@ function grabPage(input) {
         var loadTime = new Date().getTime() - startTime;
         pagesMap[uuid] = {page: page, url: url, startTime: startTime, loadTime: loadTime, status: status, output: input.output};
         if (status === 'success') {
-            page.onConsoleMessage = onConsoleMessage;
-            page.evaluateAsync(function (msg) {
-                console.log(msg);
-            }, 2000, uuid);
+            page.injectJs(timeoutJs);
+            getPageContent(uuid);
         } else {
             complete++;
         }
     });
 }
 
-function onConsoleMessage(uuid) {
+
+/**
+ * @param {string} uuid
+ * @context {PhantomJS}
+ */
+function getPageContent(uuid) {
     var data = pagesMap[uuid];
     if (data) {
         log('Page: ' + data.url + ' - got content\n');
