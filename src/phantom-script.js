@@ -11,7 +11,6 @@ var pagesMap = {};
 var complete = 0;
 var pagesLimit = 2;
 
-log('Start grabbing ' + inputs.length + ' urls\n');
 for (var i = 0, count = Math.min(inputs.length, pagesLimit); i < count; i++) {
     grabNextOrExit();
 }
@@ -34,10 +33,8 @@ function grabNextOrExit() {
                 failed++;
             }
         }
-        console.log('Grabbing complete');
-        console.log('Successful: ' + success);
-        console.log('Failed: ' + failed);
-        console.log('Full log at : ' + logPath);
+        console.log('Complete');
+        console.log('successful - ' + success + ', failed - ' + failed);
         phantom.exit();
     }
 }

@@ -88,6 +88,8 @@ var command = program['phantom'] + ' ' +
 
 shell.mkdir('-p', path.dirname(logPath));
 fs.writeFileSync(tmpobj.name, JSON.stringify(urls));
+console.log('Grabbing ' + urls.length + ' to ' + output);
+console.log('See execution log for details: ' + logPath);
 child_process.exec(command, function (error, stdout, stderr) {
     if (error || stderr) {
         console.log(error || stderr);
