@@ -33,18 +33,13 @@ html-grabber [options]
 ```    
 
 ## Examples
+This pages provide information for testing grabber functionality.
+* https://romanlubushkin.github.io/html-grabber/tests/pages/auto.html
+* https://romanlubushkin.github.io/html-grabber/tests/pages/console.html
+* https://romanlubushkin.github.io/html-grabber/tests/pages/event.html
+* https://romanlubushkin.github.io/html-grabber/tests/pages/timeout.html
+  
 
-### Grabbing list of urls
-Following command will grab some instagram pages
-```
-html-grabber --paths /,/explore/,/explore/locations/ --domain https://www.instagram.com
-```
-
-### Grabbing urls from sitemap
-Following command will grab some instagram pages
-```
-html-grabber --sitemap tests/sitemap.xml
-```
 
 ## License
 HTML Grabber released with [MIT License](https://github.com/RomanLubushkin//blob/master/LICENSE)
