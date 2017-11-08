@@ -1,6 +1,6 @@
 {
   "name": "html-grabber",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "description": "HTML Grabber - is a console utility to grab html content from JavaScript based sites (single page application)",
   "repository": {
     "type": "git",
