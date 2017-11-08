@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Console Trigger Test Page</title>
+</head>
+<body>
+<h1>Console Trigger Test Page</h1>
+<div id="container"></div>
+<p>
+    This page runs a script that will add '&lt;h2>Hello World&lt;/h2>' HTML Tag by timeout (2sec).
+    </br>You can grab this page by calling
+<pre>
+html-grabber --trigger timeout --timeout 3000  --paths /html-grabber/tests/ --domain https://romanlubushkin.github.io
+</pre>
+<script>
+    setTimeout(function() {
+        document.getElementById('container').innerHTML = '<h2>Hello World (timeout)</h2>';
+    }, 2000);
+</script>
+</body>
+</html>

@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Event Trigger Test Page</title>
+</head>
+<body>
+<h1>Event Trigger Test Page</h1>
+<div id="container"></div>
+<p>
+    This page runs a script that will add '&lt;h2>Hello World&lt;/h2>' HTML Tag by timeout and dispatch 'html-grabber-get-content' event from document.
+    </br>You can grab this page by calling
+<pre>
+html-grabber --trigger event  --paths /html-grabber/tests/ --domain https://romanlubushkin.github.io
+</pre>
+<script>
+    setTimeout(function() {
+        document.getElementById('container').innerHTML = '<h2>Hello World (event)</h2>';
+        document.dispatchEvent(new Event('html-grabber-get-content'));
+    }, 3000);
+</script>
+</body>
+</html>
