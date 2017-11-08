@@ -83,12 +83,12 @@ var logPath = path.resolve(program['log']);
 var command = program['phantom'] + ' ' +
     path.resolve(__dirname, 'src', 'phantom-script.js') + ' ' +
     tmpobj.name + ' ' +
-    path.resolve(__dirname, 'src', 'timeout.js') + ' ' +
+    'auto' + ' ' +
     logPath;
 
 shell.mkdir('-p', path.dirname(logPath));
 fs.writeFileSync(tmpobj.name, JSON.stringify(urls));
-console.log('Grabbing ' + urls.length + 'urls to ' + output + ' directory');
+console.log('Grabbing ' + urls.length + ' urls to ' + output + ' directory');
 console.log('See execution log for details: ' + logPath);
 child_process.exec(command, function (error, stdout, stderr) {
     if (error || stderr) {

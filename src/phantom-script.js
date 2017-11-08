@@ -2,81 +2,140 @@ var webpage = require('webpage');
 var fs = require('fs');
 var args = require('system').args;
 var configPath = args[1];
-var timeoutJs = args[2];
+var grabbingMode = args[2];
+var grabbingTimeout = 2000;
+var eventNameOrConsoleMsg = 'html-grabber-get-content';
 var logPath = args[3];
 var inputs = JSON.parse(fs.read(configPath));
 var inputsCount = inputs.length;
 
-var pagesMap = {};
-var complete = 0;
+var success = 0;
+var failed = 0;
 var pagesLimit = 2;
 
 for (var i = 0, count = Math.min(inputs.length, pagesLimit); i < count; i++) {
     grabNextOrExit();
 }
 
+
 function log(msg) {
-    fs.write(logPath, '[' + new Date().toString() + '] ' + msg, "a");
+    if (logPath !== 'none') {
+        fs.write(logPath, '[' + new Date().toString() + '] ' + msg, "a");
+    }
 }
+
 
 function grabNextOrExit() {
     if (inputs.length) {
         grabPage(inputs.shift());
-    } else if (complete === inputsCount) {
-        var success = 0;
-        var failed = 0;
-        for (var key in pagesMap) {
-            var row = pagesMap[key];
-            if (row.status === 'success' && row.resultTime !== undefined) {
-                success++
-            } else {
-                failed++;
-            }
-        }
+    } else if ((success + failed) === inputsCount) {
         console.log('Complete');
         console.log('successful - ' + success + ', failed - ' + failed);
         phantom.exit();
     }
 }
 
+
+function getContent(pageData, action) {
+    log('Page: ' + pageData.url + ' - got content on ' + action + '\n');
+    success++;
+    pageData.resultTime = new Date().getTime() - pageData.startTime;
+    var content = pageData.page.evaluate(function () {
+        return document.documentElement.outerHTML;
+    });
+    fs.write(pageData.output, content, 'w');
+    pageData.page.close();
+    pageData.page = null;
+    grabNextOrExit();
+}
+
+
 function grabPage(input) {
     var url = input.url;
-    var uuid = input.uuid;
     var startTime = new Date().getTime();
 
     log('Page: ' + url + ' - start\n');
     var page = webpage.create();
+    var pageData = {page: page, url: url, startTime: startTime, output: input.output, activeRequests: []};
+    var onSuccessHandler = null;
+
+    if (grabbingMode === 'auto') {
+        page.onResourceReceived = autoTrigger_onResourceReceived.bind(undefined, pageData);
+        page.onResourceRequested = autoTrigger_onResourceRequested.bind(undefined, pageData);
+        onSuccessHandler = autoTrigger_getContent.bind(pageData, 'page loaded');
+    } else if (grabbingMode === 'timeout') {
+        onSuccessHandler = timeoutTrigger_successHandler.bind(pageData);
+    } else if (grabbingMode === 'console') {
+        page.onConsoleMessage = consoleTrigger_onConsoleMessage.bind(pageData);
+    } else if (grabbingMode === 'event') {
+        page.onConsoleMessage = eventTrigger_onConsoleMessage.bind(pageData, input.uuid);
+        page.evaluate(eventTrigger_addEventListener, input.uuid, eventNameOrConsoleMsg);
+    }
+
     page.open(url, function (status) {
         log('Page: ' + url + ' - ' + status + '\n');
-        var loadTime = new Date().getTime() - startTime;
-        pagesMap[uuid] = {page: page, url: url, startTime: startTime, loadTime: loadTime, status: status, output: input.output};
+        pageData['loadTime'] = new Date().getTime() - startTime;
+        pageData['status'] = status;
+
         if (status === 'success') {
-            page.injectJs(timeoutJs);
-            getPageContent(uuid);
+            if (onSuccessHandler) onSuccessHandler();
         } else {
-            complete++;
+            failed++;
         }
     });
+
 }
 
 
-/**
- * @param {string} uuid
- * @context {PhantomJS}
- */
-function getPageContent(uuid) {
-    var data = pagesMap[uuid];
-    if (data) {
-        log('Page: ' + data.url + ' - got content\n');
-        complete++;
-        data.resultTime = new Date().getTime() - data.startTime;
-        var content = data.page.evaluate(function () {
-            return document.documentElement.outerHTML;
-        });
-        fs.write(data.output, content, 'w');
-        data.page.close();
-        data.page = null;
-        grabNextOrExit();
+// region ---- grabbing mode console
+consoleTrigger_onConsoleMessage = function(pageData, msg) {
+    if (msg === eventNameOrConsoleMsg) {
+        getContent(pageData, 'console message');
+    }
+};
+// endregion
+
+
+// region ---- grabbing mode event
+eventTrigger_onConsoleMessage = function(pageData, uuid, msg) {
+    if (msg === 'html-grabber-get-content-' + uuid) {
+        getContent(pageData, 'event');
+    }
+};
+
+eventTrigger_addEventListener = function(uuid, eventName) {
+    document.addEventListener(eventName, function () {
+        console.log('html-grabber-get-content-' + uuid);
+    });
+};
+// endregion
+
+
+// region ---- grabbing mode timeout
+function timeoutTrigger_successHandler(pageData) {
+    setTimeout(function () {
+        getContent(pageData, 'timeout');
+    }, grabbingTimeout);
+}
+
+// endregion
+
+
+// region ---- grabbing mode auto
+function autoTrigger_onResourceReceived(pageData, e) {
+    pageData.activeRequests.splice(pageData.activeRequests.indexOf(e.id), 1);
+    autoTrigger_getContent(pageData, 'resources loaded');
+
+}
+
+function autoTrigger_onResourceRequested(pageData, e) {
+    pageData.activeRequests.push(e.id);
+}
+
+function autoTrigger_getContent(pageData, action) {
+    if (pageData.activeRequests.length === 0 && pageData.loadTime !== undefined) {
+        getContent(pageData, action);
     }
 }
+// endregion
 
