@@ -11,6 +11,9 @@ var child_process = require('child_process');
 
 program
     .usage('[options]')
+    .option('-t, --trigger [value]', 'Trigger type, possible values: console, event, auto, timeout.', 'auto')
+    .option('-T, --timeout [value]', 'Timeout value in ms for trigger type "timeout", default is 3000.', 3000)
+    .option('-e, --event [value]', 'Event name for trigger types "event" and "console", default is "html-grabber-get-content"', "")
     .option('-s, --sitemap [value]', 'Path to sitemap file, if specified grabber will grab all urls from the specified sitemap.')
     .option('-d, --domain [value]', 'Domain to grab, works in combination with paths option.')
     .option('-p, --phantom [value]', 'Path to phantom executable.', 'phantomjs')
@@ -83,7 +86,9 @@ var logPath = path.resolve(program['log']);
 var command = program['phantom'] + ' ' +
     path.resolve(__dirname, 'src', 'phantom-script.js') + ' ' +
     tmpobj.name + ' ' +
-    'auto' + ' ' +
+    program['trigger'] + ' ' +
+    program['timeout'] + ' ' +
+    program['event'] + ' ' +
     logPath;
 
 shell.mkdir('-p', path.dirname(logPath));

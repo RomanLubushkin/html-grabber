@@ -3,9 +3,9 @@ var fs = require('fs');
 var args = require('system').args;
 var configPath = args[1];
 var grabbingMode = args[2];
-var grabbingTimeout = 2000;
-var eventNameOrConsoleMsg = 'html-grabber-get-content';
-var logPath = args[3];
+var grabbingTimeout = args[3];
+var eventNameOrConsoleMsg = args[4];
+var logPath = args[5];
 var inputs = JSON.parse(fs.read(configPath));
 var inputsCount = inputs.length;
 
@@ -62,14 +62,16 @@ function grabPage(input) {
     if (grabbingMode === 'auto') {
         page.onResourceReceived = autoTrigger_onResourceReceived.bind(undefined, pageData);
         page.onResourceRequested = autoTrigger_onResourceRequested.bind(undefined, pageData);
-        onSuccessHandler = autoTrigger_getContent.bind(pageData, 'page loaded');
+        onSuccessHandler = autoTrigger_getContent.bind(undefined, pageData, 'page loaded');
     } else if (grabbingMode === 'timeout') {
-        onSuccessHandler = timeoutTrigger_successHandler.bind(pageData);
+        onSuccessHandler = timeoutTrigger_successHandler.bind(undefined, pageData);
     } else if (grabbingMode === 'console') {
-        page.onConsoleMessage = consoleTrigger_onConsoleMessage.bind(pageData);
+        page.onConsoleMessage = consoleTrigger_onConsoleMessage.bind(undefined, pageData);
     } else if (grabbingMode === 'event') {
-        page.onConsoleMessage = eventTrigger_onConsoleMessage.bind(pageData, input.uuid);
-        page.evaluate(eventTrigger_addEventListener, input.uuid, eventNameOrConsoleMsg);
+        page.onConsoleMessage = eventTrigger_onConsoleMessage.bind(undefined, pageData);
+        onSuccessHandler = function () {
+            page.evaluate(eventTrigger_addEventListener, eventNameOrConsoleMsg)
+        };
     }
 
     page.open(url, function (status) {
@@ -83,31 +85,32 @@ function grabPage(input) {
             failed++;
         }
     });
-
 }
 
 
 // region ---- grabbing mode console
-consoleTrigger_onConsoleMessage = function(pageData, msg) {
+function consoleTrigger_onConsoleMessage(pageData, msg) {
     if (msg === eventNameOrConsoleMsg) {
         getContent(pageData, 'console message');
     }
-};
+}
+
 // endregion
 
 
 // region ---- grabbing mode event
-eventTrigger_onConsoleMessage = function(pageData, uuid, msg) {
-    if (msg === 'html-grabber-get-content-' + uuid) {
+function eventTrigger_onConsoleMessage(pageData, msg) {
+    if (msg === 'html-grabber-get-content') {
         getContent(pageData, 'event');
     }
-};
+}
 
-eventTrigger_addEventListener = function(uuid, eventName) {
+function eventTrigger_addEventListener(eventName) {
     document.addEventListener(eventName, function () {
-        console.log('html-grabber-get-content-' + uuid);
-    });
-};
+        console.log('html-grabber-get-content');
+    }, false);
+}
+
 // endregion
 
 
@@ -137,5 +140,6 @@ function autoTrigger_getContent(pageData, action) {
         getContent(pageData, action);
     }
 }
+
 // endregion
 

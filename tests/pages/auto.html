@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Console Trigger Test Page</title>
+</head>
+<body>
+<h1>Console Trigger Test Page</h1>
+<div id="container"></div>
+<p>
+    This page runs a script that will add '&lt;h2>Hello World&lt;/h2>' HTML Tag right after page load.
+    </br>You can grab this page by calling
+<pre>
+html-grabber --paths /html-grabber/tests/pages/auto.html --domain https://romanlubushkin.github.io
+</pre>
+<script>
+    document.getElementById('container').innerHTML = '<h2>Hello World (auto)</h2>';
+</script>
+</body>
+</html>
