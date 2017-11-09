@@ -13,7 +13,7 @@ program
     .usage('[options]')
     .option('-t, --trigger [value]', 'Trigger type, possible values: console, event, auto, timeout.', 'auto')
     .option('-T, --timeout [value]', 'Timeout value in ms for trigger type "timeout", default is 3000.', 3000)
-    .option('-e, --event [value]', 'Event name for trigger types "event" and "console", default is "html-grabber-get-content"', "")
+    .option('-e, --event [value]', 'Event name for trigger types "event" and "console", default is "html-grabber-get-content"', "html-grabber-get-content")
     .option('-s, --sitemap [value]', 'Path to sitemap file, if specified grabber will grab all urls from the specified sitemap.')
     .option('-d, --domain [value]', 'Domain to grab, works in combination with paths option.')
     .option('-p, --phantom [value]', 'Path to phantom executable.', 'phantomjs')
@@ -90,7 +90,6 @@ var command = program['phantom'] + ' ' +
     program['timeout'] + ' ' +
     program['event'] + ' ' +
     logPath;
-console.log(command);
 
 shell.mkdir('-p', path.dirname(logPath));
 fs.writeFileSync(tmpobj.name, JSON.stringify(urls));
