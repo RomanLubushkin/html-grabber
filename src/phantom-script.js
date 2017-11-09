@@ -1,11 +1,11 @@
 var webpage = require('webpage');
 var fs = require('fs');
 var args = require('system').args;
-var configPath = args[1];
-var grabbingMode = args[2];
-var grabbingTimeout = args[3];
-var eventNameOrConsoleMsg = args[4];
-var logPath = args[5];
+var configPath = args[0];
+var grabbingMode = args[1];
+var grabbingTimeout = parseInt(args[2]);
+var eventNameOrConsoleMsg = args[3];
+var logPath = args[4];
 var inputs = JSON.parse(fs.read(configPath));
 var inputsCount = inputs.length;
 

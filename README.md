@@ -39,6 +39,8 @@ This pages provide information for testing grabber functionality.
 * https://romanlubushkin.github.io/html-grabber/tests/pages/event.html
 * https://romanlubushkin.github.io/html-grabber/tests/pages/timeout.html
   
+  1. auto не работает
+  2. Нужно выходить на ошибку
 
 
 ## License

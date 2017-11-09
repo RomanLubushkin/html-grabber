@@ -90,6 +90,7 @@ var command = program['phantom'] + ' ' +
     program['timeout'] + ' ' +
     program['event'] + ' ' +
     logPath;
+console.log(command);
 
 shell.mkdir('-p', path.dirname(logPath));
 fs.writeFileSync(tmpobj.name, JSON.stringify(urls));
